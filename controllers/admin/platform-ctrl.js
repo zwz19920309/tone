@@ -8,7 +8,7 @@ const getPlatFormList = async (ctx) => {
   platformList.forEach((platform, index) => {
     platform.index = '1-' + (index + 1)
     platform.submenus = [
-      { index: (platform.index + '-1'), path: 'plateFormList?platformId=' + platform.id, name: '应用' },
+      { index: (platform.index + '-1'), path: 'sceneList?platformId=' + platform.id, name: '应用' },
       { index: (platform.index + '-2'), path: 'signonList?platformId=' + platform.id, name: '模板' },
       { index: (platform.index + '-3'), path: 'awardList?platformId=' + platform.id, name: '奖品' },
       { index: (platform.index + '-4'), path: 'awardRecordList?platformId=' + platform.id, name: '奖励记录' }

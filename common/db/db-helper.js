@@ -332,7 +332,6 @@ class DBHelper {
 
   static async bulkDetelePlatForm(params) {
     let [rows] = await DataDb.query('delete from platform WHERE id in (?)', [params.ids])
-    //  await DataDb.query('DELETE FROM scene_sign WHERE signon_id in (?) and scene_id = ?', [params.signonIds, params.sceneId])
     return rows
   }
 
