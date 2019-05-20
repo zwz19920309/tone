@@ -16,8 +16,8 @@ onerror(app)
 app.use(koastatic(path.join(__dirname, config.staticPath), { maxage: 7 * 86400 * 1000 }))
 app.use(cors({
   // origin: '*',
-  origin: 'http://localhost:8080',
-  // origin: 'http://admin-sign.jin10.com',
+  // origin: 'http://localhost:8080',
+  origin: 'http://admin-sign.jin10.com',
   credentials: true,
   allowMethods: ['GET', 'POST', 'DELETE'],
   allowHeaders: ['Content-Type', 'Authorization', 'Accept']
