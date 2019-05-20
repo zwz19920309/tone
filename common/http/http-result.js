@@ -8,7 +8,7 @@ const HttpStatus = {
   ERROR_USER: 13, // 用户名不存在或已存在
   ERROR_PASSWORD: 14, // 密码错误
   TOKEN_OUTTIME: 20, // token超时
-  TOKEN_ERROR: 41, // token不合法
+  TOKEN_ERROR: 401, // token不合法
   WECHAT_INVALID_CODE: 21 // 微信登录 code 无效
 }
 
