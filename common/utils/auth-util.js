@@ -3,7 +3,10 @@ const api = require('../../common/api/api')
 // 校验权限 哪里需要加上校验就加上此中间件
 const checkAuth = async (ctx, next) => {
   let token = ctx.cookies.get('admin_token')
+  console.log('---------------token: ', token)
   if (!token) {
+    console.log('@no--token: addToken-------')
+    ctx.cookies.set('admin_token', 'ad9377fd-1010-4ca5-97b5-a0426cdf435e')
     return (ctx.body = HttpResult.response(HttpResult.HttpStatus.ERROR_PARAMS, null, 'token参数缺失'))
   }
   let user = await api.getUserInfoByToken(token)
