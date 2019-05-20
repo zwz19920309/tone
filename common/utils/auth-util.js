@@ -7,11 +7,11 @@ const checkAuth = async (ctx, next) => {
   if (!token) {
     console.log('@no--token: addToken-------')
     ctx.cookies.set('admin_token', 'ad9377fd-1010-4ca5-97b5-a0426cdf435e')
-    return (ctx.body = HttpResult.response(HttpResult.HttpStatus.TOKEN_ERROR, null, 'admin-token参数缺失'))
+    return (ctx.body = HttpResult.response(HttpResult.HttpStatus.TOKEN_ERROR, null, '请重新登录'))
   }
   let user = await api.getUserInfoByToken(token)
   if (!user) {
-    return (ctx.body = HttpResult.response(HttpResult.HttpStatus.ERROR_USER, null, '用户不存在,请重新登录'))
+    return (ctx.body = HttpResult.response(HttpResult.HttpStatus.ERROR_USER, null, '请重新登录'))
   }
   ctx.request.body.user = user
   return next()
