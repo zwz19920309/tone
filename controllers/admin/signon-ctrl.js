@@ -81,12 +81,12 @@ const bulkDeleteSignOn = async (ctx) => {
 
 // 根据场景id获取签到类型类表
 const getSignonListBySceneId = async (ctx) => {
-  let { sceneId, type, page, pageSize, pid } = ctx.request.body
-  if (!sceneId || !pid) {
+  let { sceneid, type, page, size, pid } = ctx.request.body
+  if (!sceneid || !pid) {
     return (ctx.body = HttpResult.response(HttpResult.HttpStatus.ERROR_PARAMS, null, '参数缺失'))
   }
-  let params = { sceneId: sceneId, page: page || 1, pageSize: pageSize || 10, platform_id: pid }
-  let scene = await sceneService.findOneScene({ id: sceneId })
+  let params = { sceneId: sceneid, page: page || 1, pageSize: size || 10, platform_id: pid }
+  let scene = await sceneService.findOneScene({ id: sceneid })
   let signonList = (parseInt(type) === 1) ? await signonService.getSignonNotInList(params) : await signonService.getSignonInList(params)
   ctx.body = HttpResult.response(HttpResult.HttpStatus.SUCCESS, { list: signonList.rows, scene: scene, total: signonList.total }, 'SUCCESS')
 }
