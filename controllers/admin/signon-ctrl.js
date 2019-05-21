@@ -212,8 +212,8 @@ const bulkAddConsumes = async (ctx) => {
 
 // 签到模板批量删除消耗奖品列表
 const bulkDeleteConsumes = async (ctx) => {
-  let { id, date, prizeIds } = ctx.request.body
-  if (!id || !date || !prizeIds) {
+  let { id, date, prids } = ctx.request.body
+  if (!id || !date || !prids) {
     return (ctx.body = HttpResult.response(HttpResult.HttpStatus.ERROR_PARAMS, null, '参数缺失'))
   }
   let signon = await signonService.getSignonById({ id: id })
@@ -223,7 +223,7 @@ const bulkDeleteConsumes = async (ctx) => {
   }
   // extraText.consumes[0][date] = ToolUtil.removeDuplication(extraText.consumes[0][date], [prid])
   extraText.consumes[0][date].forEach((ele, index) => {
-    prizeIds.forEach(pid => {
+    prids.forEach(pid => {
       if (ele.prize_id === pid) {
         extraText.consumes[0][date].splice(index, 1)
       }
