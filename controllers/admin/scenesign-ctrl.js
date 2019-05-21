@@ -24,8 +24,8 @@ const bulkDeleteScenesign = async (ctx) => {
   let signonIds = []
   let sceneId
   scenesignons.forEach(ele => {
-    signonIds.push(ele.signonId)
-    sceneId = ele.sceneId
+    signonIds.push(ele.signonid)
+    sceneId = ele.sceneid
   })
   let result = await scenesignService.bulkDeleteScenesign({ signonIds: signonIds, sceneId: sceneId })
   ctx.body = HttpResult.response(HttpResult.HttpStatus.SUCCESS, { res: result }, 'SUCCESS')
