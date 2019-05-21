@@ -4,12 +4,12 @@ const scenesignService = require('../../services/admin/scenesign-service')
 // 批量增加场景签到
 const bulkAddScenesign = async (ctx) => {
   let { scenesignons } = ctx.request.body
-  if (!scenesignons) {
+  if (!(scenesignons && scenesignons.length)) {
     return (ctx.body = HttpResult.response(HttpResult.HttpStatus.ERROR_PARAMS, null, '参数scenesignons缺失'))
   }
   let paramsArr = []
   scenesignons.forEach(ele => {
-    paramsArr.push([ele.sceneId, ele.signonId, ele.startAt, ele.endAt])
+    paramsArr.push([ele.sceneid, ele.signonid, ele.start, ele.end])
   })
   let scenesign = await scenesignService.bulkCreateScenesign(paramsArr)
   ctx.body = HttpResult.response(HttpResult.HttpStatus.SUCCESS, scenesign, 'SUCCESS')
