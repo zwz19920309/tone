@@ -37,7 +37,7 @@ const reSignon = async (ctx) => {
   let pRes = await signrecordService.getTodaySignonPrizes({ uid: uid, scene_id: sceneid, nowDate: date })
   let params = { prizes: [], record: { uid: uid, scene_id: sceneid, created_at: date }, continueDate: pRes.continueSign }
   pRes.prizes.forEach(prize => {
-    params.prizes.push([uid, prize.prize_id, prize.prize_num, sceneid, moment().format('YYYY-MM-DD')])
+    params.prizes.push([uid, prize.prize_id, prize.prize_num, sceneid, moment().format('YYYY-MM-DD'), 1])
   })
   let res = await signrecordService.userSignonAward(params)
   ctx.body = HttpResult.response(HttpResult.HttpStatus.SUCCESS, { list: res }, 'SUCCESS')

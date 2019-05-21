@@ -7,11 +7,11 @@ const prizeService = require('../../services/admin/prize-service')
 
 // 获取签到类型类表
 const getSignonList = async (ctx) => {
-  let { page, pageSize, pid } = ctx.request.body
+  let { page, size, pid } = ctx.request.body
   if (!pid) {
     return (ctx.body = HttpResult.response(HttpResult.HttpStatus.ERROR_PARAMS, null, '参数缺失'))
   }
-  let signonList = await signonService.getSignonList({ page: page || 1, pageSize: pageSize || 10, platform_id: pid })
+  let signonList = await signonService.getSignonList({ page: page || 1, pageSize: size || 10, platform_id: pid })
   ctx.body = HttpResult.response(HttpResult.HttpStatus.SUCCESS, { list: signonList.rows, total: signonList.total }, 'SUCCESS')
 }
 
@@ -53,7 +53,7 @@ const updateSignonById = async (ctx) => {
   if ((checkinType === 2) && (isResign && parseInt(isResign))) { // 连续签到-可补签
     params.extra_text = JSON.stringify({ resign: { resign: isResign, form_id: formId, cost: cost, resign_dates: resignDates || [] } })
   } else {
-    params.extra_text = JSON.stringify(signon.extra_text || {})
+    params.extra_text = JSON.stringify({})
   }
   let result = await signonService.upDateSignonInfo(params, { id: id })
   ctx.body = HttpResult.response(HttpResult.HttpStatus.SUCCESS, { res: result }, 'SUCCESS')

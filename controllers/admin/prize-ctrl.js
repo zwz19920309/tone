@@ -5,11 +5,11 @@ const prizeService = require('../../services/admin/prize-service')
 
 // 获取奖品类表
 const getPrizeList = async (ctx) => {
-  let { page, pageSize, pid } = ctx.request.body
+  let { page, size, pid } = ctx.request.body
   if (!pid) {
     return (ctx.body = HttpResult.response(HttpResult.HttpStatus.ERROR_PARAMS, null, '参数缺失'))
   }
-  let { total, rows } = await prizeService.getPrizeList({ page: page, pageSize: pageSize, platform_id: pid })
+  let { total, rows } = await prizeService.getPrizeList({ page: page, pageSize: size, platform_id: pid })
   ToolUtil.prefixImgUrl(rows)
   ctx.body = HttpResult.response(HttpResult.HttpStatus.SUCCESS, { list: rows, total: total }, 'SUCCESS')
 }

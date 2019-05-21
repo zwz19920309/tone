@@ -18,6 +18,8 @@ app.use(cors({
   // origin: '*',
   // origin: 'http://localhost:8080',
   origin: 'http://admin-sign.jin10.com',
+  // exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
+  maxAge: 5,
   credentials: true,
   allowMethods: ['GET', 'POST', 'DELETE'],
   allowHeaders: ['Content-Type', 'Authorization', 'Accept']
@@ -45,6 +47,7 @@ app.use(async (ctx, next) => {
     console.log('ms: ', ms)
     // 记录响应日志
     logUtil.logResponse(ctx, ms)
+    // ctx.body.response.setHeader('Access-Control-Allow-Credentials', 'true')
   } catch (error) {
     let ms = new Date() - start
     // 记录异常日志

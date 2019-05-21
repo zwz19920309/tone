@@ -152,18 +152,18 @@ const getSelfSignon = async (params) => {
           // 可补签条件下的断签判断
           // (1) 昨天没签到而且昨天不是可补签日期
           // (2) 昨天没签到但是可补签日期 首先查出（a: 从昨天起的连续可补签日期天数) ( b: 昨天到最新签到周期第一天的间隔天数) (c:  昨天到最新签到周期第一天的实际签到天数) （c < b-a）为断签
-          if (signon.extra_text && signon.extra_text.resign && signon.extra_text.resign.isResign === 2) { // 支持补签
+          if (signon.extra_text && signon.extra_text.resign && signon.extra_text.resign.resign) { // 支持补签
             signon.need_resign = 0 // 是否需要补签
-            if ((!yearsToadyRecord && !(signon.extra_text.resign.resignDates.indexOf(yearsToday) >= 0))) { // (昨天没签到而且昨天不是可补签日期)
+            if ((!yearsToadyRecord && !(signon.extra_text.resign.resign_dates.indexOf(yearsToday) >= 0))) { // (昨天没签到而且昨天不是可补签日期)
               // console.log('@断签')
               signon.complete_count = 0
-            } else if (!yearsToadyRecord && (signon.extra_text.resign.resignDates.indexOf(yearsToday) >= 0)) { // (昨天没签到而且昨天是可补签日期)
+            } else if (!yearsToadyRecord && (signon.extra_text.resign.resign_dates.indexOf(yearsToday) >= 0)) { // (昨天没签到而且昨天是可补签日期)
               if (signRecord) { // 存在新周期第一次签到
                 let b = moment().subtract(1, 'days').diff(moment(signRecord.first_sign_date), 'days') + 1 // 昨天与新周期第一天的天数差
                 let dates = [] // 昨天开始的可连续补签日期
                 for (let m = 1; m <= b; m++) {
                   let dateStr = moment().subtract(m, 'days').format('YYYY-MM-DD')
-                  if (!(signon.extra_text.resign.resignDates.indexOf(dateStr) >= 0)) {
+                  if (!(signon.extra_text.resign.resign_dates.indexOf(dateStr) >= 0)) {
                     break
                   }
                   dates.push(moment().subtract(m, 'days').format('YYYY-MM-DD'))
