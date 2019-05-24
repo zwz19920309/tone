@@ -44,10 +44,8 @@ app.use(async (ctx, next) => {
   try {
     await next()
     let ms = new Date() - start
-    console.log('ms: ', ms)
     // 记录响应日志
     logUtil.logResponse(ctx, ms)
-    // ctx.body.response.setHeader('Access-Control-Allow-Credentials', 'true')
   } catch (error) {
     let ms = new Date() - start
     // 记录异常日志
@@ -64,5 +62,5 @@ app.on('error', (err, ctx) => {
   console.error('server error', err, ctx)
 })
 app.listen(process.env.PORT || 80)
-console.log('OT App started at port 3001...')
+console.log('OT App started at port 80...')
 module.exports = app

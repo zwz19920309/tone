@@ -11,11 +11,8 @@ const userSignon = async (ctx) => {
     return (ctx.body = HttpResult.response(HttpResult.HttpStatus.ERROR_PARAMS, null, '今日已签到'))
   }
   let pRes = await signrecordService.getTodaySignonPrizes({ uid: uid, scene_id: sceneid, nowDate: moment().format('YYYY-MM-DD HH:mm:ss') })
-  let params = { prizes: [] }
-  pRes.prizes.forEach(prize => {
-    params.prizes.push([uid, prize.prize_id, parseInt(prize.prize_num), sceneid, nowDate, 1])
-  })
-  let res = await signrecordService.userSignonAward({ prizes: params.prizes, continues: pRes.continues, record: { uid: uid, scene_id: sceneid, created_at: nowDate } })
+  let params = signrecordService.getAwardParams({ uid: uid, sceneid: sceneid, date: nowDate, prizes: pRes.prizes, continues: pRes.continues })
+  let res = await signrecordService.userSignonAward(params)
   if (!res) {
     return (ctx.body = HttpResult.response(HttpResult.HttpStatus.ERROR_DB, null, '操作异常'))
   }
@@ -34,13 +31,14 @@ const reSignon = async (ctx) => {
   if (signRecord) {
     return (ctx.body = HttpResult.response(HttpResult.HttpStatus.ERROR_PARAMS, null, '该日已签到'))
   }
-  let pRes = await signrecordService.getTodaySignonPrizes({ uid: uid, scene_id: sceneid, nowDate: date })
-  let params = { prizes: [], record: { uid: uid, scene_id: sceneid, created_at: date }, continueDate: pRes.continueSign }
-  pRes.prizes.forEach(prize => {
-    params.prizes.push([uid, prize.prize_id, prize.prize_num, sceneid, moment().format('YYYY-MM-DD'), 1])
-  })
+  let pRes = await signrecordService.getTodaySignonPrizes({ uid: uid, scene_id: sceneid, nowDate: date }) // 奖励
+  let consumes = await signrecordService.getTodaySignonConsums({ uid: uid, scene_id: sceneid, date: date }) // 消耗
+  let params = signrecordService.getAwardParams({ uid: uid, sceneid: sceneid, date: date, prizes: pRes.prizes, continues: pRes.continues, consumes: consumes })
   let res = await signrecordService.userSignonAward(params)
-  ctx.body = HttpResult.response(HttpResult.HttpStatus.SUCCESS, { list: res }, 'SUCCESS')
+  if (!res) {
+    return (ctx.body = HttpResult.response(HttpResult.HttpStatus.FAIL, null, '补签失败'))
+  }
+  ctx.body = HttpResult.response(HttpResult.HttpStatus.SUCCESS, { list: params.prizes }, 'SUCCESS')
 }
 
 // 用户签到累计信息
@@ -50,6 +48,7 @@ const getSelfSignon = async (ctx) => {
   let signons = await signrecordService.getSelfSignon({ uid: uid, scene_id: sceneid })
   ctx.body = HttpResult.response(HttpResult.HttpStatus.SUCCESS, { list: signons, is_signon: (signRecord ? 1 : 0) }, 'SUCCESS')
 }
+
 module.exports = {
   userSignon,
   reSignon,

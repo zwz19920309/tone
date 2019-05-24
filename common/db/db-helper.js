@@ -139,9 +139,14 @@ class DBHelper {
   }
 
   static async getSignonListNotInId(params) {
-    let sql = 'SELECT a.id as id, a.name as name, cycle_text, prizes_text, b.name as checktypename, b.type as checktypetype, rule_desc,  checkintype_id  FROM signon a left join checkin_type b on a.checkintype_id = b.id  where a.id not in (select distinct  signon_id from scene_sign where scene_id = ?) and a.remove = 0  and a.platform_id = ? limit ?,?'
+    let sql = 'SELECT a.id as id, a.name as name, cycle_text, prizes_text, b.name as checktypename, b.type as checktypetype, rule_desc,  checkintype_id  FROM signon a left join checkin_type b on a.checkintype_id = b.id  where a.id not in (select distinct  signon_id from scene_sign where scene_id = ?) and a.remove = 0  and a.platform_id = ? '
+    if (params.page && params.pageSize) {
+      sql += '  limit ?,?'
+    }
     let [rows] = await DataDb.query(sql, [params.sceneId, params.platform_id, (params.page - 1) * params.pageSize, params.pageSize])
-    return { total: rows.length, rows: rows }
+    let totalSql = 'SELECT count(1) as total FROM signon a left join checkin_type b on a.checkintype_id = b.id  where a.id not in (select distinct  signon_id from scene_sign where scene_id = ?) and a.remove = 0  and a.platform_id = ? '
+    let total = await DataDb.query(totalSql, [params.sceneId, params.platform_id])
+    return { total: total[0][0].total, rows: rows }
   }
 
   static async addSignon(params) {
@@ -258,7 +263,7 @@ class DBHelper {
   }
 
   static async getAwardRecordList(params) {
-    let sql = 'SELECT a.id as record_id, a.uid as uid, a.number as number, a.created_at as created_at, b.name as prize_name, b.note as prize_note from award_record a ' +
+    let sql = 'SELECT a.id as record_id, a.type as type, a.uid as uid, a.number as number, a.created_at as created_at, b.name as prize_name, b.note as prize_note from award_record a ' +
       'LEFT JOIN prize b on a.prize_id = b.id LEFT JOIN scene c on c.id = a.scene_id  where  c.platform_id = ? '
     let [rows] = await DataDb.query((sql + ' limit ?, ?'), [params.platform_id, (params.page - 1) * params.pageSize, params.pageSize])
     let tSql = 'SELECT count(1) as total from award_record a ' +

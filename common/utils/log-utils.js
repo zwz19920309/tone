@@ -41,7 +41,7 @@ logUtil.logError = function (ctx, error, resTime) {
 logUtil.logResponse = function (ctx, resTime) {
   if (ctx) {
     infoLogger.info(formatRes(ctx, resTime))
-    consoleLogger.info(formatRes(ctx, resTime))
+    // consoleLogger.info(formatRes(ctx, resTime))
     return formatError(ctx, resTime)
   }
 }

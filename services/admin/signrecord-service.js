@@ -47,10 +47,10 @@ const getTodaySignonPrizes = async (params) => {
   let res = []
   for (let m = 0; m < signonList.rows.length; m++) {
     let signon = signonList.rows[m]
-    let startAt = moment(signon.start_at).valueOf()
-    let endAt = moment(signon.end_at).valueOf()
-    let nowAt = moment(params.nowDate).valueOf()
-    if ((nowAt < endAt) && (nowAt >= startAt)) { // 签到活动时间内
+    // let startAt = moment(signon.start_at).valueOf()
+    // let endAt = moment(signon.end_at).valueOf()
+    // let nowAt = moment(params.nowDate).valueOf()
+    if ((moment(params.nowDate).valueOf() < moment(signon.end_at).valueOf()) && (moment(params.nowDate).valueOf() >= moment(signon.start_at).valueOf())) { // 签到活动时间内
       switch (signon.checkintype_id) {
         case 1:
           let p = signon.prizes_text ? (signon.prizes_text.prizes[0] ? (signon.prizes_text.prizes[0][1] ? signon.prizes_text.prizes[0][1] : 0) : 0) : 0
@@ -77,7 +77,7 @@ const getTodaySignonPrizes = async (params) => {
           }
           let ps = signon.prizes_text ? (signon.prizes_text.prizes[0] ? signon.prizes_text.prizes[0][index] ? signon.prizes_text.prizes[0][index] : [] : []) : []
           let pdata = { prizes: ps, type: 2, continue: { uid: params.uid, first_sign_date: '', last_award_date: '', scene_sign_id: signon.scene_sign_id } }
-          if ((index === 1) || (index === signon.cycle_text.number)) { // 新周期第一次签到日期 以及 上一期介素结束日
+          if ((index === 1) || (index === signon.cycle_text.number)) { // 新周期第一次签到日期 以及 上一期周期结束日
             index === 1 ? pdata.continue.first_sign_date = moment(params.nowDate).format('YYYY-MM-DD') : pdata.continue.last_award_date = moment(params.nowDate).format('YYYY-MM-DD')
           }
           res.push(pdata)
@@ -104,6 +104,38 @@ const getTodaySignonPrizes = async (params) => {
   })
   return result
 }
+
+/**
+  * 该天的签到消耗
+  * @method getTodaySignonPrizes
+  * @param  {object} params -参数
+  * @return {object} 更新结果
+ */
+const getTodaySignonConsums = async (params) => {
+  let { rows } = await DBHelper.getSignonListInId({ sceneId: params.scene_id })
+  let prizes = []
+  rows.forEach(signon => {
+    if (signon.extra_text && signon.extra_text.consumes && signon.extra_text.consumes.length && signon.extra_text.consumes[0][params.date]) {
+      prizes = prizes.concat(signon.extra_text.consumes[0][params.date])
+    }
+  })
+  return prizes
+}
+
+const getAwardParams = (params) => {
+  let result = { prizes: [], record: { uid: params.uid, scene_id: params.sceneid, created_at: params.date }, continues: params.continues }
+  params.prizes.forEach(prize => {
+    result.prizes.push([params.uid, prize.prize_id, prize.prize_num, params.sceneid, moment().format('YYYY-MM-DD'), 1])
+  })
+  if (params.consumes && params.consumes.length) {
+    result.consumes = []
+    params.consumes.forEach(prize => {
+      result.prizes.push([params.uid, prize.prize_id, prize.prize_num, params.sceneid, moment().format('YYYY-MM-DD'), 2])
+    })
+  }
+  return result
+}
+
 /**
   * 获取签到类型列表
   * @method  getCheckInTypeList
@@ -228,7 +260,9 @@ module.exports = {
   addSignRecord,
   getSumUserSignRcord,
   getTodaySignonPrizes,
+  getTodaySignonConsums,
   userSignonAward,
   getUserSignRecord,
-  getSelfSignon
+  getSelfSignon,
+  getAwardParams
 }
