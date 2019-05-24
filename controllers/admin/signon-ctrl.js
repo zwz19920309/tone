@@ -149,7 +149,7 @@ const getPrizesBySignonById = async (ctx) => {
     existPrizes.forEach(ele => {
       existIds.push(ele.prize_id)
     })
-    prizes = await prizeService.getPrizeListInId({ prize_ids: existIds })
+    prizes = await prizeService.getPrizeListAllInId({ prize_ids: existIds })
     existPrizes.forEach(ele => {
       prizes.rows.forEach(prize => {
         if (ele.prize_id === prize.id) {

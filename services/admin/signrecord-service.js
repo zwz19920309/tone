@@ -1,6 +1,7 @@
 const moment = require('moment')
 const DBHelper = require('../../common/db/db-helper')
 const continuesignService = require('../../services/admin/continuesign-service')
+const prizeService = require('../../services/admin/prize-service')
 const ToolUtil = require('../../common/utils/tool-util')
 /**
   * 获取签到类型列表
@@ -42,20 +43,16 @@ const getSumUserSignRcord = async (params) => {
   * @return {object} 更新结果
  */
 const getTodaySignonPrizes = async (params) => {
-  let signonList = await DBHelper.getSignonListInId({ sceneId: params.scene_id })
-  // let result = { prizes: [], continueSign: { uid: params.uid, first_sign_date: '', last_award_date: '' } }
+  let { rows } = await DBHelper.getSignonListInId({ sceneId: params.scene_id })
   let res = []
-  for (let m = 0; m < signonList.rows.length; m++) {
-    let signon = signonList.rows[m]
-    // let startAt = moment(signon.start_at).valueOf()
-    // let endAt = moment(signon.end_at).valueOf()
-    // let nowAt = moment(params.nowDate).valueOf()
+  for (let m = 0; m < rows.length; m++) {
+    let signon = rows[m]
     if ((moment(params.nowDate).valueOf() < moment(signon.end_at).valueOf()) && (moment(params.nowDate).valueOf() >= moment(signon.start_at).valueOf())) { // 签到活动时间内
       switch (signon.checkintype_id) {
         case 1:
           let p = signon.prizes_text ? (signon.prizes_text.prizes[0] ? (signon.prizes_text.prizes[0][1] ? signon.prizes_text.prizes[0][1] : 0) : 0) : 0
           if (p) {
-            res.push({ prizes: p, type: 1 })
+            res.push({ prizes: p })
           }
           break
         case 2:
@@ -76,7 +73,7 @@ const getTodaySignonPrizes = async (params) => {
             }
           }
           let ps = signon.prizes_text ? (signon.prizes_text.prizes[0] ? signon.prizes_text.prizes[0][index] ? signon.prizes_text.prizes[0][index] : [] : []) : []
-          let pdata = { prizes: ps, type: 2, continue: { uid: params.uid, first_sign_date: '', last_award_date: '', scene_sign_id: signon.scene_sign_id } }
+          let pdata = { prizes: ps, continue: { uid: params.uid, first_sign_date: '', last_award_date: '', scene_sign_id: signon.scene_sign_id } }
           if ((index === 1) || (index === signon.cycle_text.number)) { // 新周期第一次签到日期 以及 上一期周期结束日
             index === 1 ? pdata.continue.first_sign_date = moment(params.nowDate).format('YYYY-MM-DD') : pdata.continue.last_award_date = moment(params.nowDate).format('YYYY-MM-DD')
           }
@@ -87,12 +84,19 @@ const getTodaySignonPrizes = async (params) => {
           let nIndex = await DBHelper.getSumUserSignRcord({ uid: params.uid, scene_id: params.scene_id, start_at: dates.startAt, end_at: dates.endAt })
           nIndex = nIndex + 1
           let lps = signon.prizes_text ? (signon.prizes_text.prizes[0] ? signon.prizes_text.prizes[0][nIndex] ? signon.prizes_text.prizes[0][nIndex] : [] : []) : []
-          res.push({ prizes: lps, type: 3 })
+          res.push({ prizes: lps })
       }
     }
   }
+  let result = await getValidPrizes(res)
+  return result
+}
+/**
+ * 获取生效的奖品
+*/
+const getValidPrizes = async (res) => {
   let result = { prizes: [], continues: [] }
-  res.forEach(ele => {
+  res.forEach(ele => { // 奖品以及签到周期记录
     if (ele.prizes.length) {
       result.prizes = result.prizes.concat(ele.prizes)
     }
@@ -102,9 +106,26 @@ const getTodaySignonPrizes = async (params) => {
       }
     }
   })
+  let validPids = []
+  result.prizes.forEach(prize => { // 所有奖品的id
+    validPids.push(prize.prize_id)
+  })
+  let prizeList = await prizeService.getPrizeListInId({ prize_ids: validPids }) // 合法的奖品id
+  let validPrizes = []
+  result.prizes.forEach((prize) => {
+    let flag = false
+    prizeList.rows.forEach(validPrize => {
+      if (prize.prize_id === validPrize.id) {
+        flag = true // 在生效范围
+      }
+    })
+    if (flag) {
+      validPrizes.push(prize)
+    }
+  })
+  result.prizes = validPrizes
   return result
 }
-
 /**
   * 该天的签到消耗
   * @method getTodaySignonPrizes

@@ -25,11 +25,16 @@ const getPrizeListInId = async (params) => {
   let prizeList = await DBHelper.getPrizeListInId(params)
   return prizeList
 }
+
 const getPrizeListNotInId = async (params) => {
   let prizeList = await DBHelper.getPrizeListNotInId(params)
   return prizeList
 }
 
+const getPrizeListAllInId = async (params) => {
+  let prizeList = await DBHelper.getPrizeListAllInId(params)
+  return prizeList
+}
 /**
   * 增加奖品
   * @method addPrize
@@ -81,5 +86,6 @@ module.exports = {
   bulkDeletePrize,
   getPrizeById,
   getPrizeListInId,
+  getPrizeListAllInId,
   getPrizeListNotInId
 }

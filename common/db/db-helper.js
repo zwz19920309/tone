@@ -181,36 +181,42 @@ class DBHelper {
   }
 
   static async getPrizeList(params) {
-    let [rows] = await DataDb.query('SELECT id, name, note, icon from prize where platform_id = ? limit ?, ?', [params.platform_id, (params.page - 1) * params.pageSize, params.pageSize])
-    let total = await DataDb.query('SELECT count(1) as total FROM prize where platform_id = ?', [params.platform_id])
+    let [rows] = await DataDb.query('SELECT id, name, note, icon, remove from prize where platform_id = ? and remove = 0 limit ?, ?', [params.platform_id, (params.page - 1) * params.pageSize, params.pageSize])
+    let total = await DataDb.query('SELECT count(1) as total FROM prize where platform_id = ? and remove = 0', [params.platform_id])
     return { total: total[0][0].total, rows: rows }
   }
 
   static async getPrizeListNotInId(params) {
-    let [rows] = await DataDb.query('select id, name, note, icon FROM prize where id not in (?) and platform_id = ? limit ?, ?', [params.prize_ids, params.platform_id, (params.page - 1) * params.pageSize, params.pageSize])
-    let total = await DataDb.query('select count(1) as total FROM prize where id not in (?) and platform_id = ?', [params.prize_ids, params.platform_id])
+    let [rows] = await DataDb.query('select id, name, note, icon, remove FROM prize where id not in (?) and platform_id = ? limit ?, ? and remove = 0', [params.prize_ids, params.platform_id, (params.page - 1) * params.pageSize, params.pageSize])
+    let total = await DataDb.query('select count(1) as total FROM prize where id not in (?) and platform_id = ? and remove = 0', [params.prize_ids, params.platform_id])
     return { total: total[0][0].total, rows: rows }
   }
 
   static async getPrizeListInId(params) {
-    let [rows] = await DataDb.query('select id, name, note, icon FROM prize where id in (?)', [params.prize_ids, (params.page - 1) * params.pageSize, params.pageSize])
+    let [rows] = await DataDb.query('select id, name, note, icon, remove FROM prize where id in (?) and remove = 0', [params.prize_ids])
+    let total = await DataDb.query('select count(1) as total FROM prize where id  in (?) and remove = 0', [params.prize_ids])
+    return { total: total[0][0].total, rows: rows }
+  }
+
+  static async getPrizeListAllInId(params) {
+    let [rows] = await DataDb.query('select id, name, note, icon, remove FROM prize where id in (?)', [params.prize_ids])
     let total = await DataDb.query('select count(1) as total FROM prize where id  in (?)', [params.prize_ids])
     return { total: total[0][0].total, rows: rows }
   }
 
   static async savePrize(params) {
-    let [rows] = await DataDb.query('insert into prize  SET ?', [{ platform_id: params.platform_id, name: params.name, note: params.note, icon: params.icon }])
+    let [rows] = await DataDb.query('INSERT into PRIZE  SET ?', [{ platform_id: params.platform_id, name: params.name, note: params.note, icon: params.icon }])
     return rows
   }
 
   static async bulckDetelePrize(params) {
-    let [rows] = await DataDb.query('delete from prize WHERE id in (?)', [params.ids])
+    let [rows] = await DataDb.query('UPDATE prize SET ? WHERE id in (?)', [{ remove: 1 }, params.ids])
     //  await DataDb.query('DELETE FROM scene_sign WHERE signon_id in (?) and scene_id = ?', [params.signonIds, params.sceneId])
     return rows
   }
 
   static async updatePrize(params, cons) {
-    let [rows] = await DataDb.query('update prize SET ? where id = ?', [{ name: params.name, note: params.note, icon: params.icon }, cons.id])
+    let [rows] = await DataDb.query('UPDATE prize SET ? where id = ?', [{ name: params.name, note: params.note, icon: params.icon }, cons.id])
     return rows
   }
 
@@ -264,10 +270,10 @@ class DBHelper {
 
   static async getAwardRecordList(params) {
     let sql = 'SELECT a.id as record_id, a.type as type, a.uid as uid, a.number as number, a.created_at as created_at, b.name as prize_name, b.note as prize_note from award_record a ' +
-      'LEFT JOIN prize b on a.prize_id = b.id LEFT JOIN scene c on c.id = a.scene_id  where  c.platform_id = ? '
+      'LEFT JOIN prize b on a.prize_id = b.id LEFT JOIN scene c on c.id = a.scene_id  where  c.platform_id = ? and b.remove = 0'
     let [rows] = await DataDb.query((sql + ' limit ?, ?'), [params.platform_id, (params.page - 1) * params.pageSize, params.pageSize])
     let tSql = 'SELECT count(1) as total from award_record a ' +
-      'LEFT JOIN prize b on a.prize_id = b.id LEFT JOIN scene c on c.id = a.scene_id  where  c.platform_id = ? '
+      'LEFT JOIN prize b on a.prize_id = b.id LEFT JOIN scene c on c.id = a.scene_id  where  c.platform_id = ? and b.remove = 0'
     let total = await DataDb.query(tSql, [params.platform_id])
     return { total: total[0][0].total, rows: rows }
   }
@@ -308,8 +314,8 @@ class DBHelper {
   }
 
   static async getUserAwardListBySceneId(params) {
-    let [rows] = await DataDb.query('SELECT a.uid as uid , a.prize_id as prize_id , a.number as prize_number, a.scene_id as scene_id , b.name as prize_name, icon FROM user_award a LEFT JOIN prize b on a.prize_id = b.id WHERE scene_id = ? and uid = ? limit ?, ?', [params.scene_id, params.uid, (params.page - 1) * params.pageSize, params.pageSize])
-    let total = await DataDb.query('SELECT count(1)  as total FROM user_award a LEFT JOIN prize b on a.prize_id = b.id WHERE scene_id = ? and uid = ? ', [params.scene_id, params.uid])
+    let [rows] = await DataDb.query('SELECT a.uid as uid , a.prize_id as prize_id , a.number as prize_number, a.scene_id as scene_id , b.name as prize_name, icon FROM user_award a LEFT JOIN prize b on a.prize_id = b.id  WHERE scene_id = ? and a.uid = ?  and remove = 0 limit ?, ?', [params.scene_id, params.uid, (params.page - 1) * params.pageSize, params.pageSize])
+    let total = await DataDb.query('SELECT count(1)  as total FROM user_award a LEFT JOIN prize b on a.prize_id = b.id WHERE scene_id = ? and a.uid = ? and remove = 0', [params.scene_id, params.uid])
     let res = { total: total[0][0].total, rows: rows }
     return res
   }
