@@ -215,13 +215,13 @@ class DBHelper {
     return rows
   }
 
-  static async updatePrize(params, cons) {
-    let [rows] = await DataDb.query('UPDATE prize SET ? where id = ?', [{ name: params.name, note: params.note, icon: params.icon }, cons.id])
+  static async updatePrize(params) {
+    let [rows] = await DataDb.query('UPDATE prize SET ? where id = ?', [{ name: params.name, note: params.note, icon: params.icon }, params.id])
     return rows
   }
 
   static async getPrizeById(params) {
-    let [rows] = await DataDb.query('SELECT name, note, icon FROM prize where id = ?', [params.id])
+    let [rows] = await DataDb.query('SELECT id, name, note, icon FROM prize where id = ?', [params.id])
     return rows[0]
   }
 

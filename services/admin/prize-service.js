@@ -62,8 +62,8 @@ const getPrizeById = async (params) => {
   * @cons  {object} cons -更新条件
   * @return {object} 更新结果
  */
-const updatePrize = async (params, cons) => {
-  let result = await DBHelper.updatePrize(params, cons)
+const updatePrize = async (params) => {
+  let result = await DBHelper.updatePrize(params)
   return result
 }
 
