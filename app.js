@@ -16,8 +16,8 @@ onerror(app)
 app.use(koastatic(path.join(__dirname, config.staticPath), { maxage: 7 * 86400 * 1000 }))
 app.use(cors({
   // origin: '*',
-  origin: 'http://localhost:8080',
-  // origin: 'http://admin-sign.jin10.com',
+  // origin: 'http://localhost:8080',
+  origin: 'http://admin-sign.jin10.com',
   // exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
   maxAge: 5,
   credentials: true,
@@ -61,6 +61,6 @@ app.use(index.routes(), index.allowedMethods())
 app.on('error', (err, ctx) => {
   console.error('server error', err, ctx)
 })
-app.listen(process.env.PORT || 3001)
+app.listen(process.env.PORT || 80)
 console.log('OT App started at port 80...')
 module.exports = app
