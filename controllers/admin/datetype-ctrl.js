@@ -6,7 +6,8 @@ const getDateTypeList = async (ctx) => {
   let { type } = ctx.request.body
   let dateTypeList
   (!type) && (type = 0)
-  if (parseInt(type) === 0) {
+  type = parseInt(type)
+  if (type === 0) {
     dateTypeList = await datetypeService.getDateTypeList()
   } else {
     dateTypeList = await datetypeService.getDateTypeListByType(type)

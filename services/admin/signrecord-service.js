@@ -15,10 +15,10 @@ const addSignRecord = async (params) => {
 }
 
 /**
-  * 获取签到类型列表
-  * @method  getCheckInTypeList
+  * 获取用户签到记录
+  * @method  getUserSignRecord
   * @param  {object} params - 参数
-  * @return {object} 签到类型列表
+  * @return {object} 用户签到记录
  */
 const getUserSignRecord = async (params) => {
   let res = await DBHelper.getUserSignRecord(params)
@@ -26,10 +26,10 @@ const getUserSignRecord = async (params) => {
 }
 
 /**
-  * 获取签到类型列表
-  * @method  getCheckInTypeList
+  * 获取用户签到记录次数
+  * @method  getSumUserSignRcord
   * @param  {object} params - 参数
-  * @return {object} 签到类型列表
+  * @return {object} 签到次数记录表
  */
 const getSumUserSignRcord = async (params) => {
   let res = await DBHelper.getSumUserSignRcord(params)
@@ -110,32 +110,35 @@ const getValidPrizes = async (res) => {
   result.prizes.forEach(prize => { // 所有奖品的id
     validPids.push(prize.prize_id)
   })
-  let prizeList = await prizeService.getPrizeListInId({ prize_ids: validPids }) // 合法的奖品id
-  let validPrizes = []
-  result.prizes.forEach((prize) => {
-    let flag = false
-    prizeList.rows.forEach(validPrize => {
-      if (prize.prize_id === validPrize.id) {
-        flag = true // 在生效范围
+  if (result.prizes && result.prizes.length) {
+    let prizeList = await prizeService.getPrizeListInId({ prize_ids: validPids }) // 合法的奖品id
+    let validPrizes = []
+    result.prizes.forEach((prize) => {
+      let flag = false
+      prizeList.rows.forEach(validPrize => {
+        if (prize.prize_id === validPrize.id) {
+          flag = true // 在生效范围
+        }
+      })
+      if (flag) {
+        validPrizes.push(prize)
       }
     })
-    if (flag) {
-      validPrizes.push(prize)
-    }
-  })
-  result.prizes = validPrizes
+    result.prizes = validPrizes
+  }
   return result
 }
 /**
   * 该天的签到消耗
-  * @method getTodaySignonPrizes
+  * @method getTodaySignonConsums
   * @param  {object} params -参数
   * @return {object} 更新结果
  */
 const getTodaySignonConsums = async (params) => {
   let { rows } = await DBHelper.getSignonListInId({ sceneId: params.scene_id })
+  // console.log('@rows: ', rows)
   let prizes = []
-  rows.forEach(signon => {
+  rows.forEach((signon, index) => {
     if (signon.extra_text && signon.extra_text.consumes && signon.extra_text.consumes.length && signon.extra_text.consumes[0][params.date]) {
       prizes = prizes.concat(signon.extra_text.consumes[0][params.date])
     }
@@ -158,10 +161,10 @@ const getAwardParams = (params) => {
 }
 
 /**
-  * 获取签到类型列表
+  * 用户签到记录以及奖励
   * @method  getCheckInTypeList
   * @param  {object} params - 参数
-  * @return {object} 签到类型列表
+  * @return {object} 用户签到记录以及奖励列表
  */
 const userSignonAward = async (params) => {
   let res = await DBHelper.userSignonAward(params)
@@ -170,7 +173,7 @@ const userSignonAward = async (params) => {
 
 /**
   * 签到情况
-  * @method getTodaySignonPrizes
+  * @method getSelfSignon
   * @param  {object} params -参数
   * @return {object} 更新结果
  */

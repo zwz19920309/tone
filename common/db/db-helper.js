@@ -314,8 +314,8 @@ class DBHelper {
   }
 
   static async getUserAwardListBySceneId(params) {
-    let [rows] = await DataDb.query('SELECT a.uid as uid , a.prize_id as prize_id , a.number as prize_number, a.scene_id as scene_id , b.name as prize_name, icon FROM user_award a LEFT JOIN prize b on a.prize_id = b.id  WHERE scene_id = ? and a.uid = ?  and remove = 0 limit ?, ?', [params.scene_id, params.uid, (params.page - 1) * params.pageSize, params.pageSize])
-    let total = await DataDb.query('SELECT count(1)  as total FROM user_award a LEFT JOIN prize b on a.prize_id = b.id WHERE scene_id = ? and a.uid = ? and remove = 0', [params.scene_id, params.uid])
+    let [rows] = await DataDb.query('SELECT a.uid as uid , a.prize_id as prize_id , a.number as prize_number, a.scene_id as scene_id , b.name as prize_name, icon FROM user_award a LEFT JOIN prize b on a.prize_id = b.id  WHERE a.scene_id = ? and a.uid = ?  and b.remove = 0', [params.scene_id, params.uid, (params.page - 1) * params.pageSize, params.pageSize])
+    let total = await DataDb.query('SELECT count(1)  as total FROM user_award a LEFT JOIN prize b on a.prize_id = b.id WHERE a.scene_id = ? and a.uid = ? and b.remove = 0', [params.scene_id, params.uid])
     let res = { total: total[0][0].total, rows: rows }
     return res
   }
@@ -356,25 +356,29 @@ class DBHelper {
           let [rows] = await con.query('SELECT id, uid, prize_id, number FROM user_award  WHERE uid = ? and scene_id = ? and prize_id = ? FOR UPDATE', [params.uid, params.scene_id, ele.prize])
           if (rows.length) {
             if (parseInt(ele.type) === 1) {
-              let [res] = await con.query('UPDATE user_award SET number = ' + (rows[0].number + parseInt(ele.number)) + ' where id = ?', [rows[0].id])
+              let [res] = await con.query('UPDATE user_award SET number = ' + (parseInt(rows[0].number) + parseInt(ele.number)) + ' where id = ?', [rows[0].id])
               if (!res.changedRows) {
                 result = { flag: false, msg: '修改数量失败' }
               }
             } else if (parseInt(ele.type) === 0) {
               if (rows[0].number >= ele.number) {
-                let [res] = await con.query('UPDATE user_award SET number = ' + (rows[0].number - parseInt(ele.number)) + ' where id = ?', [rows[0].id])
+                let [res] = await con.query('UPDATE user_award SET number = ' + (parseInt(rows[0].number) - parseInt(ele.number)) + ' where id = ?', [rows[0].id])
                 if (!res.changedRows) {
                   result = { flag: 0, msg: '修改数量失败' }
                 }
               } else {
                 result = { flag: 0, msg: '奖品数量不足' }
               }
+            } else {
+              result = { flag: 0, msg: '参数type值错误' }
             }
             await await con.query('INSERT INTO award_record SET ?', [{ uid: params.uid, prize_id: ele.prize, number: ele.number, scene_id: params.scene_id, type: ele.type, created_at: moment().format('YYYY-MM-DD') }])
           } else {
             result = { flag: 0, msg: '某奖品不存在' }
           }
         }
+      } else {
+        result = { flag: false, msg: 'consumes参数为空数组' }
       }
       if (result && result.flag) {
         await con.commit()

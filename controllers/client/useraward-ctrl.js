@@ -15,6 +15,11 @@ const consumeUserAward = async (ctx) => {
   if (!consumes || !consumes.length) {
     return (ctx.body = HttpResult.response(HttpResult.HttpStatus.ERROR_PARAMS, null, '参数不合法'))
   }
+  consumes.forEach(ele => {
+    if (parseInt(ele.number) <= 0) {
+      return (ctx.body = HttpResult.response(HttpResult.HttpStatus.ERROR_PARAMS, null, '参数number不合法'))
+    }
+  })
   let result = await userawardService.consumeUserAward({ scene_id: sceneid, uid: uid, consumes: consumes })
   ctx.body = HttpResult.response(HttpResult.HttpStatus.SUCCESS, result, 'SUCCESS')
 }
