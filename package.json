@@ -27,7 +27,7 @@
     "moment": "^2.24.0",
     "move-file": "^1.2.0",
     "mysql2": "^1.6.5",
-    "pug": "^2.0.0-rc.1",
+    "pug": "^3.0.1",
     "randomstring": "^1.1.5",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
