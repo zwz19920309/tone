@@ -22,7 +22,7 @@
     "koa-static": "^3.0.0",
     "koa-views": "^5.2.1",
     "koa2-cors": "^2.0.6",
-    "log4js": "^4.1.0",
+    "log4js": "^6.4.0",
     "mocha": "^6.1.4",
     "moment": "^2.24.0",
     "move-file": "^1.2.0",
